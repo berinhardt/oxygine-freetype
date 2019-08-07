@@ -6,76 +6,79 @@
 
 extern "C"
 {
-    typedef struct FT_FaceRec_*  FT_Face;
+typedef struct FT_FaceRec_* FT_Face;
 }
 
-namespace oxygine
-{
-    class CreateResourceContext;
-    class FontFT;
-    class Font;
-    class Image;
-    struct glyph;
-    typedef size_t glyphOptions;
+namespace oxygine {
+class CreateResourceContext;
+class FontFT;
+class Font;
+class Image;
+struct glyph;
+typedef size_t glyphOptions;
 
-    class ResFontFT : public ResFont
-    {
-    public:
-        static void initLibrary();
-        static void freeLibrary();
-        static int  getSnapSize();
+class ResFontFT : public ResFont {
+public:
 
-        static void setSnapSize(int size);
-        static void setMaxSnapSize(int size);
-        static void setAtlasSize(int w, int h);
-        static void setGlobalWorldScale(float s);
+   static void initLibrary();
+   static void freeLibrary();
+   static int  getSnapSize();
 
-        struct postProcessData
-        {
-            //you could modify src pixels too
-            ImageData* src;
+   static void setSnapSize(int size);
+   static void setMaxSnapSize(int size);
+   static void setAtlasSize(int w, int h);
+   static void setGlobalWorldScale(float s);
 
-            //where you should write result
-            Image* dest;
+   struct postProcessData
+   {
+      // you could modify src pixels too
+      ImageData* src;
 
-            //your value passed to TextStyle/TextField
-            glyphOptions opt;
+      // where you should write result
+      Image* dest;
 
-            glyph* gl;
-            const Font* font;
-        };
-        typedef void(*postProcessHook)(postProcessData&);
+      // your value passed to TextStyle/TextField
+      glyphOptions opt;
 
-        static void setGlyphPostProcessor(postProcessHook);
+      glyph*      gl;
+      const Font* font;
+   };
+   typedef void (* postProcessHook)(postProcessData&);
 
-        ResFontFT();
-        ~ResFontFT();
+   static void setGlyphPostProcessor(postProcessHook);
 
-        void init(const std::string& fnt);
+   ResFontFT();
+   ~ResFontFT();
 
-        const Font* getFont(const char* name, int size) const override;
-        const Font* getClosestFont(float worldScale, int styleFontSize, float& resScale) const override;
+   void        init(const std::string& fnt);
+   std::string getFile() const {
+      return _file;
+   }
 
-    protected:
-        friend class FontFT;
+   const Font* getFont(const char* name, int size) const override;
+   const Font* getClosestFont(float worldScale, int styleFontSize, float& resScale) const override;
 
-        static Resource* createResource(CreateResourceContext& context);
-        void _load(LoadResourcesContext* context) override;
-        void _unload() override;
+protected:
 
-        Font* getFont(int size);
+   friend class FontFT;
 
-        MultiAtlas _atlas;
-        spTexture createTexture(int w, int h);
+   static Resource* createResource(CreateResourceContext& context);
+   void             _load(LoadResourcesContext* context) override;
+   void             _unload() override;
 
-        FT_Face _face;
+   Font*            getFont(int size);
 
-        typedef std::list<FontFT> fonts;
-        fonts _fonts;
-        file::buffer _fdata;
-    };
+   MultiAtlas _atlas;
+   spTexture        createTexture(int w, int h);
+
+   FT_Face _face;
+
+   typedef std::list<FontFT> fonts;
+   fonts _fonts;
+   file::buffer _fdata;
+   std::string _file;
+};
 
 
-
-    void ftGenDefault(ResFontFT::postProcessData& data);
+void ftGenDefault(ResFontFT::postProcessData& data);
 }
