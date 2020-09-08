@@ -127,8 +127,10 @@ public:
       if (size <= 0) size = 10;
       _ignoreOptions = false;
 
-      FT_Face face = _rs->_face;
-      FT_Set_Pixel_Sizes(_rs->_face, 0, size);
+      FT_Face face = *(_rs->_faces.begin());
+
+      FT_Set_Pixel_Sizes(face, 0, size);
+
       int dist  = (int)(face->size->metrics.height / 64);
       int mxadv = dist; // face->size->metrics.max_advance / 64;
 
@@ -144,19 +146,25 @@ protected:
    ResFontFT* _rs;
    int _size;
    bool loadGlyph(int code, glyph& g, const glyphOptions& opt) override {
-      FT_Face face = _rs->_face;
+      FT_Face face = NULL;
+      int     page = 0;
 
-      FT_Set_Pixel_Sizes(_rs->_face, 0, _size);
+      for (auto it = _rs->_faces.begin(); it != _rs->_faces.end(); ++it) {
+         face = *it;
+         FT_Set_Pixel_Sizes(face, 0, _size);
 
 
-      /* load glyph image into the slot (erase previous one) */
-      int sm    = decodeSymbol(code);
-      int error = FT_Load_Char(face, sm, FT_LOAD_RENDER);
+         /* load glyph image into the slot (erase previous one) */
+         int sm    = decodeSymbol(code);
+         int index = FT_Get_Char_Index(face, sm);
+         int error = FT_Load_Glyph(face, index, FT_LOAD_RENDER);
 
-      if (error) return false;
+         if (error) return false;
+
+         if (index != 0) break;
+      }
 
       FT_GlyphSlot slot = face->glyph;
-
 
       FT_Bitmap bitmap = slot->bitmap;
 
@@ -253,7 +261,7 @@ void ResFontFT::setGlobalWorldScale(float s) {
    FT_GLOBAL_WORLD_SCALE = s;
 }
 
-ResFontFT::ResFontFT() : _atlas(CLOSURE(this, &ResFontFT::createTexture)), _face(0) {
+ResFontFT::ResFontFT() : _atlas(CLOSURE(this, &ResFontFT::createTexture)) {
    _atlas.init();
 }
 
@@ -319,13 +327,29 @@ const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSi
 void ResFontFT::_load(LoadResourcesContext* context) {
    if (!_file.empty()) {
       file::read(_file.c_str(), _fdata);
-
-      int error = FT_New_Memory_Face(_library,
-                                     reinterpret_cast<const unsigned char*>(_fdata.getData()), _fdata.getSize(), 0, &_face);
+      FT_Face _face;
+      int     error = FT_New_Memory_Face(_library,
+                                         reinterpret_cast<const unsigned char*>(_fdata.getData()), _fdata.getSize(), 0, &_face);
+      _faces.push_back(_face);
       OX_ASSERT(!error);
       _file = "";
    }
 }
 
-void ResFontFT::_unload() {}
+void ResFontFT::addFace(const unsigned char* data, size_t size) {
+   FT_Face _face;
+   int     error = FT_New_Memory_Face(_library, data, size, 0, &_face);
+
+   if (!error) {
+      _faces.push_back(_face);
+
+      for (auto it = _fonts.begin(); it != _fonts.end(); ++it) {
+         it->clear();
+      }
+   }
+}
+
+void ResFontFT::_unload() {
+   _faces.clear();
+}
 }

@@ -58,6 +58,8 @@ public:
    const Font* getFont(const char* name, int size) const override;
    const Font* getClosestFont(float worldScale, int styleFontSize, float& resScale) const override;
 
+   void        addFace(const unsigned char* data, size_t size);
+
 protected:
 
    friend class FontFT;
@@ -71,7 +73,7 @@ protected:
    MultiAtlas _atlas;
    spTexture        createTexture(int w, int h);
 
-   FT_Face _face;
+   std::list<FT_Face> _faces;
 
    typedef std::list<FontFT> fonts;
    fonts _fonts;
