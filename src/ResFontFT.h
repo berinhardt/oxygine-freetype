@@ -20,6 +20,11 @@ typedef size_t glyphOptions;
 class ResFontFT : public ResFont {
 public:
 
+   typedef Closure<void (int)> symbolCallback;
+   void setNotFoundCallback(symbolCallback cb);
+
+public:
+
    static void initLibrary();
    static void freeLibrary();
    static int  getSnapSize();
@@ -74,6 +79,8 @@ protected:
    spTexture        createTexture(int w, int h);
 
    std::list<FT_Face> _faces;
+
+   symbolCallback notFoundCB;
 
    typedef std::list<FontFT> fonts;
    fonts _fonts;

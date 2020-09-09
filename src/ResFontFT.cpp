@@ -146,8 +146,9 @@ protected:
    ResFontFT* _rs;
    int _size;
    bool loadGlyph(int code, glyph& g, const glyphOptions& opt) override {
-      FT_Face face = NULL;
-      int     page = 0;
+      FT_Face face  = NULL;
+      bool    found = false;
+      int     sm    = decodeSymbol(code);
 
       for (auto it = _rs->_faces.begin(); it != _rs->_faces.end(); ++it) {
          face = *it;
@@ -155,14 +156,20 @@ protected:
 
 
          /* load glyph image into the slot (erase previous one) */
-         int sm    = decodeSymbol(code);
          int index = FT_Get_Char_Index(face, sm);
          int error = FT_Load_Glyph(face, index, FT_LOAD_RENDER);
 
-         if (error) return false;
+         if (error) {
+            return false;
+         }
 
-         if (index != 0) break;
+         if (index != 0) {
+            found = true;
+            break;
+         }
       }
+
+      if (!found && _rs->notFoundCB) _rs->notFoundCB(sm);
 
       FT_GlyphSlot slot = face->glyph;
 
@@ -346,6 +353,14 @@ void ResFontFT::addFace(const unsigned char* data, size_t size) {
       for (auto it = _fonts.begin(); it != _fonts.end(); ++it) {
          it->clear();
       }
+   }
+}
+
+void ResFontFT::setNotFoundCallback(symbolCallback cb) {
+   this->notFoundCB = cb;
+
+   for (auto it = _fonts.begin(); it != _fonts.end(); ++it) {
+      it->clear();
    }
 }
 
