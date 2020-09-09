@@ -169,7 +169,10 @@ protected:
          }
       }
 
-      if (!found && _rs->notFoundCB) _rs->notFoundCB(sm);
+      if (!found) {
+         if (_rs->notFoundCB) _rs->notFoundCB(sm);
+         return false;
+      }
 
       FT_GlyphSlot slot = face->glyph;
 
@@ -351,7 +354,7 @@ void ResFontFT::addFace(const unsigned char* data, size_t size) {
       _faces.push_back(_face);
 
       for (auto it = _fonts.begin(); it != _fonts.end(); ++it) {
-         it->clear();
+         it->rehash();
       }
    }
 }
@@ -360,7 +363,7 @@ void ResFontFT::setNotFoundCallback(symbolCallback cb) {
    this->notFoundCB = cb;
 
    for (auto it = _fonts.begin(); it != _fonts.end(); ++it) {
-      it->clear();
+      it->rehash();
    }
 }
 
