@@ -46,6 +46,7 @@ static const uint8_t utf8d[] =
    1,         1,   1,   4,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 0, 1, 1, 1, 8, 7, 6, 4, 5, 4, 3, 2, 1, 1, 1, 1,
 };
 
+namespace oxygine {
 uint32_t decodeSymbol(int sym) {
    int symArr[] = { sym, 0 };
    uint8_t* s = (uint8_t*)symArr;
@@ -91,7 +92,9 @@ uint32_t decodeSymbol(int sym) {
    return 0;
 }
 
-namespace oxygine {
+int encodeSymbol(uint32_t unic) {
+   return unic;
+}
 FT_Library _library = 0;
 
 

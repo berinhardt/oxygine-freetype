@@ -16,7 +16,8 @@ class Font;
 class Image;
 struct glyph;
 typedef size_t glyphOptions;
-
+uint32_t decodeSymbol(int sym);
+int      encodeSymbol(uint32_t unic);
 class ResFontFT : public ResFont {
 public:
 
