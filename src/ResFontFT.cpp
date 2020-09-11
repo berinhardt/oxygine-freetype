@@ -141,6 +141,10 @@ public:
 #endif // if !defined(_MSC_VER) ||  (_MSC_VER >= 1900)
    }
 
+   virtual void BiDiPass(std::vector<text::Symbol*>& line) {
+      if (_rs->bidiDelegate()) _rs->bidiDelegate()(line);
+   }
+
 protected:
 
    ResFontFT* _rs;
@@ -271,7 +275,7 @@ void ResFontFT::setGlobalWorldScale(float s) {
    FT_GLOBAL_WORLD_SCALE = s;
 }
 
-ResFontFT::ResFontFT() : _atlas(CLOSURE(this, &ResFontFT::createTexture)) {
+ResFontFT::ResFontFT() : _atlas(CLOSURE(this, &ResFontFT::createTexture)), _bidiDelegate(NULL) {
    _atlas.init();
 }
 

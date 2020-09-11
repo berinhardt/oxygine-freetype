@@ -49,6 +49,15 @@ public:
       const Font* font;
    };
    typedef void (* postProcessHook)(postProcessData&);
+   typedef void (* BiDiCallback)(std::vector<text::Symbol*>&);
+
+   BiDiCallback bidiDelegate() {
+      return _bidiDelegate;
+   }
+
+   void setBidiDelegate(BiDiCallback cb) {
+      _bidiDelegate = cb;
+   }
 
    static void setGlyphPostProcessor(postProcessHook);
 
@@ -81,6 +90,8 @@ protected:
    std::list<FT_Face> _faces;
 
    symbolCallback notFoundCB;
+   BiDiCallback _bidiDelegate;
+
 
    typedef std::list<FontFT> fonts;
    fonts _fonts;
