@@ -51,11 +51,9 @@ public:
    typedef void (* postProcessHook)(postProcessData&);
    typedef void (* BiDiCallback)(std::vector<text::Symbol*>&);
 
-   BiDiCallback bidiDelegate() {
-      return _bidiDelegate;
-   }
+   BiDiCallback bidiDelegate();
 
-   void setBidiDelegate(BiDiCallback cb) {
+   void         setBidiDelegate(BiDiCallback cb) {
       _bidiDelegate = cb;
    }
 

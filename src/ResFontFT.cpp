@@ -141,7 +141,7 @@ public:
 #endif // if !defined(_MSC_VER) ||  (_MSC_VER >= 1900)
    }
 
-   virtual void BiDiPass(std::vector<text::Symbol*>& line) {
+   virtual void BiDiPass(std::vector<text::Symbol*>& line) const override {
       if (_rs->bidiDelegate()) _rs->bidiDelegate()(line);
    }
 
@@ -373,5 +373,10 @@ void ResFontFT::setNotFoundCallback(symbolCallback cb) {
 
 void ResFontFT::_unload() {
    _faces.clear();
+}
+
+ResFontFT::BiDiCallback ResFontFT::bidiDelegate() {
+   if (_bidiDelegate) logs::messageln("GET BIDI DELEGATE");
+   return _bidiDelegate;
 }
 }
