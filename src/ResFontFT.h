@@ -50,7 +50,7 @@ public:
       const Font* font;
    };
    typedef void (* postProcessHook)(postProcessData&);
-   typedef void (* BiDiCallback)(std::vector<text::Symbol*>&);
+   typedef bool (* BiDiCallback)(std::vector<text::Symbol*>&);
 
    BiDiCallback bidiDelegate();
 
