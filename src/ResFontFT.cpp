@@ -144,8 +144,9 @@ public:
 #endif // if !defined(_MSC_VER) ||  (_MSC_VER >= 1900)
    }
 
-   virtual void BiDiPass(std::vector<text::Symbol*>& line) const override {
-      if (_rs->bidiDelegate()) _rs->bidiDelegate()(line);
+   virtual bool BiDiPass(std::vector<text::Symbol*>& line) const override {
+      if (_rs->bidiDelegate()) return _rs->bidiDelegate()(line);
+      else return false;
    }
 
 protected:
