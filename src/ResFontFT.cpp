@@ -97,23 +97,24 @@ int encodeSymbol(uint32_t unic) {
    unsigned char* utf8 = (unsigned char*)&rval;
 
    if (unic < 0x80) {
-      utf8[0] = unic >> 0 & 0x7F | 0x00;
+      utf8[0] = (unic >> 0 & 0x7F) | 0x00;
    } else if (unic < 0x0800) {
-      utf8[0] = unic >> 6 & 0x1F | 0xC0;
-      utf8[1] = unic >> 0 & 0x3F | 0x80;
+      utf8[0] = (unic >> 6 & 0x1F) | 0xC0;
+      utf8[1] = (unic >> 0 & 0x3F) | 0x80;
    } else if (unic < 0x010000) {
-      utf8[0] = unic >> 12 & 0x0F | 0xE0;
-      utf8[1] = unic >> 6 & 0x3F | 0x80;
-      utf8[2] = unic >> 0 & 0x3F | 0x80;
+      utf8[0] = (unic >> 12 & 0x0F) | 0xE0;
+      utf8[1] = (unic >> 6 & 0x3F) | 0x80;
+      utf8[2] = (unic >> 0 & 0x3F) | 0x80;
    } else {
-      utf8[0] = unic >> 18 & 0x07 | 0xF0;
-      utf8[1] = unic >> 12 & 0x3F | 0x80;
-      utf8[2] = unic >> 6 & 0x3F | 0x80;
-      utf8[3] = unic >> 0 & 0x3F | 0x80;
+      utf8[0] = (unic >> 18 & 0x07) | 0xF0;
+      utf8[1] = (unic >> 12 & 0x3F) | 0x80;
+      utf8[2] = (unic >> 6 & 0x3F) | 0x80;
+      utf8[3] = (unic >> 0 & 0x3F) | 0x80;
    }
 
    return rval;
 }
+
 FT_Library _library = 0;
 
 
