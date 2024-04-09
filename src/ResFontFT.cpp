@@ -1,60 +1,457 @@
 #include "ResFontFT.h"
-#include "oxygine/res/Resources.h"
+
+#include "ft2build.h"
 #include "oxygine/Font.h"
-#include "oxygine/res/CreateResourceContext.h"
-#include "oxygine/core/NativeTexture.h"
 #include "oxygine/Image.h"
 #include "oxygine/core/ImageDataOperations.h"
+#include "oxygine/core/NativeTexture.h"
 #include "oxygine/core/VideoDriver.h"
-#include "ft2build.h"
+#include "oxygine/res/CreateResourceContext.h"
+#include "oxygine/res/Resources.h"
 
 #include FT_FREETYPE_H
 
-
 #ifdef _MSC_VER
-typedef unsigned __int8  uint8_t;
+typedef unsigned __int8 uint8_t;
 typedef unsigned __int32 uint32_t;
-#else // ifdef _MSC_VER
-# include <stdint.h>
-#endif // ifdef _MSC_VER
-
+#else  // ifdef _MSC_VER
+#include <stdint.h>
+#endif  // ifdef _MSC_VER
 
 #define ASCII_IN_TABLE 1
 
 static const uint8_t utf8d[] =
-{
+    {
 #if ASCII_IN_TABLE
-   0,           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-   0,           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-   0,           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-   0,           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#endif // if ASCII_IN_TABLE
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+#endif  // if ASCII_IN_TABLE
 
-   070,       070, 070, 070, 070, 070, 070, 070, 070, 070, 070, 070, 070, 070, 070, 070,
-   050,       050, 050, 050, 050, 050, 050, 050, 050, 050, 050, 050, 050, 050, 050, 050,
-   030,       030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030,
-   030,       030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030, 030,
-   204,       204, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188,
-   188,       188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188, 188,
-   174,       158, 158, 158, 158, 158, 158, 158, 158, 158, 158, 158, 158, 142, 126, 126,
-   111,        95,  95,  95,  79, 207, 207, 207, 207, 207, 207, 207, 207, 207, 207, 207,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        070,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        050,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        030,
+        204,
+        204,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        188,
+        174,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        158,
+        142,
+        126,
+        126,
+        111,
+        95,
+        95,
+        95,
+        79,
+        207,
+        207,
+        207,
+        207,
+        207,
+        207,
+        207,
+        207,
+        207,
+        207,
+        207,
 
-   0,           1,   1,   1,   8,   7,   6,   4,   5,   4,   3,   2,   1,   1,   1,   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-   1,           0,   0,   0,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-   1,           2,   2,   2,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-   1,           4,   4,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 1, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-   1,           1,   1,   4,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1, 0, 1, 1, 1, 8, 7, 6, 4, 5, 4, 3, 2, 1, 1, 1, 1,
+        0,
+        1,
+        1,
+        1,
+        8,
+        7,
+        6,
+        4,
+        5,
+        4,
+        3,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        4,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        4,
+        4,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        4,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        8,
+        7,
+        6,
+        4,
+        5,
+        4,
+        3,
+        2,
+        1,
+        1,
+        1,
+        1,
 };
 
 namespace oxygine {
 uint32_t decodeSymbol(int sym) {
-   int symArr[] = { sym, 0 };
+   int symArr[] = {sym, 0};
    uint8_t* s = (uint8_t*)symArr;
-   uint8_t  data, byte, stat = 9;
+   uint8_t data, byte, stat = 9;
    uint32_t unic = 0;
 
-   while ((byte = *s++))
-   {
+   while ((byte = *s++)) {
       // Each byte is associated with a character class and a mask;
       // The character class is used to advance a finite automaton;
       // The mask is used to strip off leading bits from the byte;
@@ -65,7 +462,7 @@ uint32_t decodeSymbol(int sym) {
       data = utf8d[byte];
       stat = utf8d[256 + (stat << 4) + (data >> 4)];
       byte = (byte ^ (uint8_t)(data << 4));
-#else // if ASCII_IN_TABLE
+#else   // if ASCII_IN_TABLE
 
       if (byte < 0x80) {
          stat = utf8d[128 + (stat << 4)];
@@ -74,7 +471,7 @@ uint32_t decodeSymbol(int sym) {
          stat = utf8d[128 + (stat << 4) + (data >> 4)];
          byte = (byte ^ (uint8_t)(data << 4));
       }
-#endif // if ASCII_IN_TABLE
+#endif  // if ASCII_IN_TABLE
 
       unic = (unic << 6) | byte;
 
@@ -93,7 +490,7 @@ uint32_t decodeSymbol(int sym) {
 }
 
 int encodeSymbol(uint32_t unic) {
-   int rval            = 0;
+   int rval = 0;
    unsigned char* utf8 = (unsigned char*)&rval;
 
    if (unic < 0x80) {
@@ -117,15 +514,13 @@ int encodeSymbol(uint32_t unic) {
 
 FT_Library _library = 0;
 
-
-static int   FT_SNAP_SIZE          = 1000;
-static int   FT_MAX_SNAP_SIZE      = 200;
+static int FT_SNAP_SIZE = 1000;
+static int FT_MAX_SNAP_SIZE = 200;
 static float FT_GLOBAL_WORLD_SCALE = 0.0f;
 static oxygine::Point FT_ATLAS_SIZE(512, 512);
 
-
 void ftGenDefault(ResFontFT::postProcessData& data) {
-   Image& dest          = *data.dest;
+   Image& dest = *data.dest;
    const ImageData& src = *data.src;
 
    dest.init(src.w, src.h, TF_R8G8B8A8);
@@ -142,8 +537,7 @@ void ResFontFT::setGlyphPostProcessor(postProcessHook f) {
 Image tempImage;
 
 class FontFT : public Font {
-public:
-
+  public:
    FontFT(ResFontFT* rs, int size) : _rs(rs), _size(size) {
       OX_ASSERT(size > 0);
 
@@ -154,34 +548,34 @@ public:
 
       FT_Set_Pixel_Sizes(face, 0, size);
 
-      int dist  = (int)(face->size->metrics.height / 64);
-      int mxadv = dist; // face->size->metrics.max_advance / 64;
+      int dist = (int)(face->size->metrics.height / 64);
+      int mxadv = dist;  // face->size->metrics.max_advance / 64;
 
       init("abc", size, dist, mxadv);
 
-#if !defined(_MSC_VER) ||  (_MSC_VER >= 1900)
+#if !defined(_MSC_VER) || (_MSC_VER >= 1900)
       _glyphs.reserve(100);
-#endif // if !defined(_MSC_VER) ||  (_MSC_VER >= 1900)
+#endif  // if !defined(_MSC_VER) ||  (_MSC_VER >= 1900)
    }
 
    virtual bool BiDiPass(std::vector<text::Symbol*>& line) const override {
-      if (_rs->bidiDelegate()) return _rs->bidiDelegate()(line);
-      else return false;
+      if (_rs->bidiDelegate())
+         return _rs->bidiDelegate()(line);
+      else
+         return false;
    }
 
-protected:
-
+  protected:
    ResFontFT* _rs;
    int _size;
    bool loadGlyph(int code, glyph& g, const glyphOptions& opt) override {
-      FT_Face face  = NULL;
-      bool    found = false;
-      int     sm    = decodeSymbol(code);
+      FT_Face face = NULL;
+      bool found = false;
+      int sm = decodeSymbol(code);
 
       for (auto it = _rs->_faces.begin(); it != _rs->_faces.end(); ++it) {
          face = *it;
          FT_Set_Pixel_Sizes(face, 0, _size);
-
 
          /* load glyph image into the slot (erase previous one) */
          int index = FT_Get_Char_Index(face, sm);
@@ -208,30 +602,27 @@ protected:
 
       ImageData src(bitmap.width, bitmap.rows, bitmap.pitch, TF_A8, bitmap.buffer);
 
-
       Rect srcRect;
       spTexture t;
 
-
       g.advance_x = static_cast<short>(slot->advance.x >> 6);
       g.advance_y = static_cast<short>(slot->advance.y >> 6);
-      g.offset_x  = slot->bitmap_left;
-      g.offset_y  = -slot->bitmap_top;
-      g.ch        = code;
-      g.opt       = opt;
-
+      g.offset_x = slot->bitmap_left;
+      g.offset_y = -slot->bitmap_top;
+      g.ch = code;
+      g.opt = opt;
 
       // if (src.w && src.h)
       {
          ResFontFT::postProcessData gd;
-         gd.src  = &src;
+         gd.src = &src;
          gd.dest = &tempImage;
-         gd.gl   = &g;
-         gd.opt  = opt;
+         gd.gl = &g;
+         gd.opt = opt;
          gd.font = this;
 
-
-         if (src.w && src.h) _ftGen(gd);
+         if (src.w && src.h)
+            _ftGen(gd);
          else {
             tempImage.init(0, 0, TF_R8G8B8A8);
          }
@@ -240,11 +631,10 @@ protected:
          OX_ASSERT(t);
          g.src = srcRect.cast<RectF>();
          Vector2 sz((float)t->getWidth(), (float)t->getHeight());
-         g.src.pos  = g.src.pos.div(sz);
-         g.src.size = g.src.size.div(sz);
-         g.texture  = safeSpCast<NativeTexture>(t);
+         g.src.pos = g.src.pos / sz;
+         g.src.size = g.src.size / sz;
+         g.texture = safeSpCast<NativeTexture>(t);
       }
-
 
       g.sw = tempImage.getWidth();
       g.sh = tempImage.getHeight();
@@ -253,10 +643,8 @@ protected:
    }
 };
 
-
 Resource* ResFontFT::createResource(CreateResourceContext& context) {
    ResFontFT* res = new ResFontFT;
-
 
    pugi::xml_node node = context.walker.getNode();
 
@@ -366,8 +754,8 @@ void ResFontFT::_load(LoadResourcesContext* context) {
    if (!_file.empty()) {
       file::read(_file.c_str(), _fdata);
       FT_Face _face;
-      int     error = FT_New_Memory_Face(_library,
-                                         reinterpret_cast<const unsigned char*>(_fdata.getData()), _fdata.getSize(), 0, &_face);
+      int error = FT_New_Memory_Face(_library,
+                                     reinterpret_cast<const unsigned char*>(_fdata.getData()), _fdata.getSize(), 0, &_face);
       _faces.push_back(_face);
       OX_ASSERT(!error);
       _file = "";
@@ -376,7 +764,7 @@ void ResFontFT::_load(LoadResourcesContext* context) {
 
 void ResFontFT::addFace(const unsigned char* data, size_t size) {
    FT_Face _face;
-   int     error = FT_New_Memory_Face(_library, data, size, 0, &_face);
+   int error = FT_New_Memory_Face(_library, data, size, 0, &_face);
 
    if (!error) {
       _faces.push_back(_face);
@@ -402,4 +790,4 @@ void ResFontFT::_unload() {
 ResFontFT::BiDiCallback ResFontFT::bidiDelegate() {
    return _bidiDelegate;
 }
-}
+}  // namespace oxygine

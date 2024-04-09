@@ -34,7 +34,7 @@ add_library(oxygine-freetype STATIC
 	src/ResFontFT.cpp 
 	src/ResFontFT.h
 )
-
+target_link_libraries(oxygine-freetype PUBLIC oxygine-framework)
 
 set(OXYGINE_FREETYPE_INCLUDE_DIRS ${OXYGINE_FREETYPE_INCLUDE_DIRS} PARENT_SCOPE)
 set(OXYGINE_FREETYPE_LIBS ${OXYGINE_FREETYPE_LIBS} PARENT_SCOPE)
