@@ -98,7 +98,7 @@ void ResFontFT::setGlyphPostProcessor(postProcessHook f) {
 }
 
 Image tempImage;
-
+#define STBTT_SCALE 1.33f
 class FontFT : public Font {
   public:
    FontFT(ResFontFT* rs, int size) : _rs(rs), _size(size) {
@@ -112,7 +112,7 @@ class FontFT : public Font {
       int descent;
       int linegap;
       stbtt_GetFontVMetrics(&face, &ascent, &descent, &linegap);
-      float scale = stbtt_ScaleForPixelHeight(&face, size);      
+      float scale = stbtt_ScaleForPixelHeight(&face, _size*STBTT_SCALE);      
 
       int baseline = ascent * scale;
       int mxadv = (ascent - descent + linegap) * scale;
@@ -156,7 +156,7 @@ class FontFT : public Font {
       Point g_size;
       Point g_off;
       // TODO: SDF
-      float scale = stbtt_ScaleForPixelHeight(face, _size);
+      float scale = stbtt_ScaleForPixelHeight(face, _size*STBTT_SCALE);
       uint8_t* bitmap = stbtt_GetGlyphBitmap(face, scale, scale, index, &g_size.x, &g_size.y, &g_off.x, &g_off.y);
       int advance;
       int bearing;
