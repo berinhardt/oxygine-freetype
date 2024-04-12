@@ -1,13 +1,10 @@
 #pragma once
-#include "oxygine/res/ResFont.h"
-#include "oxygine/utils/AtlasBuilder.h"
-#include "oxygine/core/file.h"
 #include <list>
 
-extern "C"
-{
-typedef struct FT_FaceRec_* FT_Face;
-}
+#include "oxygine/core/file.h"
+#include "oxygine/res/ResFont.h"
+#include "oxygine/utils/AtlasBuilder.h"
+#include "stb_truetype.h"
 
 namespace oxygine {
 class CreateResourceContext;
@@ -19,24 +16,20 @@ typedef size_t glyphOptions;
 uint32_t decodeSymbol(int sym);
 int      encodeSymbol(uint32_t unic);
 class ResFontFT : public ResFont {
-public:
-
-   typedef Closure<void (int)> symbolCallback;
+  public:
+   typedef Closure<void(int)> symbolCallback;
    void setNotFoundCallback(symbolCallback cb);
 
-public:
-
+  public:
    static void initLibrary();
    static void freeLibrary();
-   static int  getSnapSize();
+   static int getSnapSize();
 
    static void setSnapSize(int size);
    static void setMaxSnapSize(int size);
    static void setAtlasSize(int w, int h);
-   static void setGlobalWorldScale(float s);
 
-   struct postProcessData
-   {
+   struct postProcessData {
       // you could modify src pixels too
       ImageData* src;
 
@@ -46,15 +39,15 @@ public:
       // your value passed to TextStyle/TextField
       glyphOptions opt;
 
-      glyph*      gl;
+      glyph* gl;
       const Font* font;
    };
-   typedef void (* postProcessHook)(postProcessData&);
-   typedef bool (* BiDiCallback)(std::vector<text::Symbol*>&);
+   typedef void (*postProcessHook)(postProcessData&);
+   typedef bool (*BiDiCallback)(std::vector<text::Symbol*>&);
 
    BiDiCallback bidiDelegate();
 
-   void         setBidiDelegate(BiDiCallback cb) {
+   void setBidiDelegate(BiDiCallback cb) {
       _bidiDelegate = cb;
    }
 
@@ -63,7 +56,7 @@ public:
    ResFontFT();
    ~ResFontFT();
 
-   void        init(const std::string& fnt);
+   void init(const std::string& fnt);
    std::string getFile() const {
       return _file;
    }
@@ -71,26 +64,24 @@ public:
    const Font* getFont(const char* name, int size) const override;
    const Font* getClosestFont(float worldScale, int styleFontSize, float& resScale) const override;
 
-   void        addFace(const unsigned char* data, size_t size);
+   void addFace(const unsigned char* data, size_t size);
 
-protected:
-
+  protected:
    friend class FontFT;
 
    static Resource* createResource(CreateResourceContext& context);
-   void             _load(LoadResourcesContext* context) override;
-   void             _unload() override;
+   void _load(LoadResourcesContext* context) override;
+   void _unload() override;
 
-   Font*            getFont(int size);
+   Font* getFont(int size);
 
    MultiAtlas _atlas;
-   spTexture        createTexture(int w, int h);
+   spTexture createTexture(int w, int h);
 
-   std::list<FT_Face> _faces;
+   std::list<stbtt_fontinfo> _faces;
 
    symbolCallback notFoundCB;
    BiDiCallback _bidiDelegate;
-
 
    typedef std::list<FontFT> fonts;
    fonts _fonts;
@@ -98,6 +89,5 @@ protected:
    std::string _file;
 };
 
-
 void ftGenDefault(ResFontFT::postProcessData& data);
-}
+}  // namespace oxygine
