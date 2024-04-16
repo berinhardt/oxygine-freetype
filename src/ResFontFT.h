@@ -14,7 +14,7 @@ class Image;
 struct glyph;
 typedef size_t glyphOptions;
 uint32_t decodeSymbol(int sym);
-int      encodeSymbol(uint32_t unic);
+int encodeSymbol(uint32_t unic);
 class ResFontFT : public ResFont {
   public:
    typedef Closure<void(int)> symbolCallback;
@@ -23,10 +23,6 @@ class ResFontFT : public ResFont {
   public:
    static void initLibrary();
    static void freeLibrary();
-   static int getSnapSize();
-
-   static void setSnapSize(int size);
-   static void setMaxSnapSize(int size);
    static void setAtlasSize(int w, int h);
 
    struct postProcessData {

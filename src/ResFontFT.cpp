@@ -78,8 +78,6 @@ int encodeSymbol(uint32_t unic) {
    return rval;
 }
 
-static int FT_SNAP_SIZE = 5;
-static int FT_MAX_SNAP_SIZE = 200;
 static oxygine::Point FT_ATLAS_SIZE(512, 512);
 
 void ftGenDefault(ResFontFT::postProcessData& data) {
@@ -98,26 +96,28 @@ void ResFontFT::setGlyphPostProcessor(postProcessHook f) {
 }
 
 Image tempImage;
-#define STBTT_SCALE 1.33f
+#define STBTT_SCALE 1.2f
+#define SBTT_SDF_SIZE 20
 class FontFT : public Font {
   public:
-   FontFT(ResFontFT* rs, int size) : _rs(rs), _size(size) {
+   FontFT(ResFontFT* rs, int size, bool SDF) : _rs(rs), _size(size) {
       OX_ASSERT(size > 0);
 
       if (size <= 0) size = 10;
-      _ignoreOptions = false;
+      _ignoreOptions = true;
 
       stbtt_fontinfo& face = *_rs->_faces.begin();
       int ascent;
       int descent;
       int linegap;
       stbtt_GetFontVMetrics(&face, &ascent, &descent, &linegap);
-      float scale = stbtt_ScaleForPixelHeight(&face, _size*STBTT_SCALE);      
+      float scale = stbtt_ScaleForPixelHeight(&face, _size * STBTT_SCALE);
 
       int baseline = ascent * scale;
       int mxadv = (ascent - descent + linegap) * scale;
+      _SDF = SDF;
 
-      init("TTF Font", size, baseline, mxadv);
+      init("TTF Font", size, baseline, mxadv, SDF);
       logs::messageln("FONT %p=>%p::%d %f", rs, this, size, scale);
    }
 
@@ -131,6 +131,7 @@ class FontFT : public Font {
   protected:
    ResFontFT* _rs;
    int _size;
+   bool _SDF;
    bool loadGlyph(int code, glyph& g, const glyphOptions& opt) override {
       bool found = false;
       stbtt_fontinfo* face;
@@ -155,26 +156,33 @@ class FontFT : public Font {
       }
       Point g_size;
       Point g_off;
-      // TODO: SDF
-      float scale = stbtt_ScaleForPixelHeight(face, _size*STBTT_SCALE);
-      uint8_t* bitmap = stbtt_GetGlyphBitmap(face, scale, scale, index, &g_size.x, &g_size.y, &g_off.x, &g_off.y);
+
+      int oneside = 200;
+      int padding = SBTT_SDF_SIZE / 2;
+
+      float scale = stbtt_ScaleForPixelHeight(face, _size * STBTT_SCALE);
+      uint8_t* bitmap;
+      if (_SDF)
+         bitmap = stbtt_GetGlyphSDF(face, scale, index, padding, oneside, (uint8_t)(oneside / padding), &g_size.x, &g_size.y, &g_off.x, &g_off.y);
+      else {
+         bitmap = stbtt_GetGlyphBitmap(face, scale, scale, index, &g_size.x, &g_size.y, &g_off.x, &g_off.y);
+         padding = 0;
+      }
       int advance;
       int bearing;
       stbtt_GetGlyphHMetrics(face, index, &advance, &bearing);
 
       ImageData src(g_size.x, g_size.y, g_size.x, TF_A8, bitmap);
-      std::string utf8;
-      oxygine::charCode2Bytes(utf8, code);
-      
+
       Rect srcRect;
       spTexture t;
 
       g.advance_x = advance * scale;
       g.advance_y = 0;
       g.offset_x = g_off.x;
-      g.offset_y = g_off.y;
+      g.offset_y = g_off.y - padding / 2;
       g.ch = code;
-      g.opt = opt;
+      g.opt = 0;  // opt;
 
       // if (src.w && src.h)
       {
@@ -203,6 +211,11 @@ class FontFT : public Font {
       g.sw = tempImage.getWidth();
       g.sh = tempImage.getHeight();
 
+      /*
+      std::string utf8;
+      oxygine::charCode2Bytes(utf8, code);
+      logs::messageln("GLYPH <%s> [%d] [%d,%d]x[%d,%d]x[%d,%d]", utf8.c_str(), padding, g.offset_x, g.offset_y, g.advance_x, g.advance_y, g.sw, g.sh);
+      */
       stbtt_FreeBitmap(bitmap, nullptr);
 
       return true;
@@ -228,18 +241,6 @@ void ResFontFT::initLibrary() {
 
 void ResFontFT::freeLibrary() {
    Resources::unregisterResourceType("ftfont");
-}
-
-int ResFontFT::getSnapSize() {
-   return FT_SNAP_SIZE;
-}
-
-void ResFontFT::setSnapSize(int size) {
-   FT_SNAP_SIZE = size;
-}
-
-void ResFontFT::setMaxSnapSize(int size) {
-   FT_MAX_SNAP_SIZE = size;
 }
 
 void ResFontFT::setAtlasSize(int w, int h) {
@@ -279,7 +280,7 @@ Font* ResFontFT::getFont(int size) {
       if (f->getSize() == size) return f;
    }
 
-   _fonts.push_back(FontFT(this, size));
+   _fonts.push_back(FontFT(this, size, true));
    return &_fonts.back();
 }
 
@@ -291,16 +292,15 @@ const Font* ResFontFT::getFont(const char* name, int size) const {
 }
 
 const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSize, float& resScale) const {
-   //if (FT_GLOBAL_WORLD_SCALE != 0.0f) worldScale = FT_GLOBAL_WORLD_SCALE;
+   // if (FT_GLOBAL_WORLD_SCALE != 0.0f) worldScale = FT_GLOBAL_WORLD_SCALE;
    int fontSize = (int)(styleFontSize * worldScale);
 
    if (!fontSize) return 0;
 
-   if (fontSize > FT_SNAP_SIZE) {
-      int x = fontSize + FT_SNAP_SIZE - 1;
-      fontSize = x - (x % FT_SNAP_SIZE);
-      fontSize = std::min(fontSize, FT_MAX_SNAP_SIZE);
-   }
+   if (fontSize < SBTT_SDF_SIZE)
+      fontSize = SBTT_SDF_SIZE;
+   else
+      fontSize -= fontSize % SBTT_SDF_SIZE;
 
    resScale = (float)fontSize / styleFontSize;
    return getFont(0, fontSize);
