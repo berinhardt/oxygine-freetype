@@ -120,7 +120,7 @@ class FontFT : public Font {
       init("TTF Font", size, baseline, mxadv, SDF);
       logs::messageln("FONT %p=>%p::%d %f", rs, this, size, scale);
    }
-
+   virtual int getPadding() const override { return SBTT_SDF_SIZE / 2; }
    virtual bool BiDiPass(std::vector<text::Symbol*>& line) const override {
       if (_rs->bidiDelegate())
          return _rs->bidiDelegate()(line);
@@ -158,7 +158,7 @@ class FontFT : public Font {
       Point g_off;
 
       int oneside = 200;
-      int padding = SBTT_SDF_SIZE / 2;
+      int padding = getPadding();
 
       float scale = stbtt_ScaleForPixelHeight(face, _size * STBTT_SCALE);
       uint8_t* bitmap;
@@ -179,8 +179,8 @@ class FontFT : public Font {
 
       g.advance_x = advance * scale;
       g.advance_y = 0;
-      g.offset_x = g_off.x;
-      g.offset_y = g_off.y - padding / 2;
+      g.offset_x = g_off.x-1;
+      g.offset_y = g_off.y-1;
       g.ch = code;
       g.opt = 0;  // opt;
 
@@ -279,7 +279,6 @@ Font* ResFontFT::getFont(int size) {
 
       if (f->getSize() == size) return f;
    }
-
    _fonts.push_back(FontFT(this, size, true));
    return &_fonts.back();
 }
@@ -292,17 +291,19 @@ const Font* ResFontFT::getFont(const char* name, int size) const {
 }
 
 const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSize, float& resScale) const {
-   // if (FT_GLOBAL_WORLD_SCALE != 0.0f) worldScale = FT_GLOBAL_WORLD_SCALE;
-   int fontSize = (int)(styleFontSize * worldScale);
+   if (!styleFontSize) return 0;
+   
+   int fontSize = styleFontSize;
 
-   if (!fontSize) return 0;
+   int delta = fontSize % SBTT_SDF_SIZE;
+   
+   if (delta > SBTT_SDF_SIZE/2) fontSize += SBTT_SDF_SIZE - delta;
+   else {
+      fontSize -= delta;
+      if (fontSize < SBTT_SDF_SIZE) fontSize = SBTT_SDF_SIZE;
+   }
 
-   if (fontSize < SBTT_SDF_SIZE)
-      fontSize = SBTT_SDF_SIZE;
-   else
-      fontSize -= fontSize % SBTT_SDF_SIZE;
-
-   resScale = (float)fontSize / styleFontSize;
+   resScale = (float)fontSize / (float)styleFontSize;
    return getFont(0, fontSize);
 }
 
