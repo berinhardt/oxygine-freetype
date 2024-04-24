@@ -154,10 +154,10 @@ class FontFT : public Font {
          if (_rs->notFoundCB) _rs->notFoundCB(unicode);
          return false;
       }
-      Point g_size;
-      Point g_off;
+      Point g_size(0);
+      Point g_off(0);
 
-      int oneside = 200;
+      int oneside = 128;
       int padding = getPadding();
 
       float scale = stbtt_ScaleForPixelHeight(face, _size * STBTT_SCALE);
@@ -179,8 +179,8 @@ class FontFT : public Font {
 
       g.advance_x = advance * scale;
       g.advance_y = 0;
-      g.offset_x = g_off.x-1;
-      g.offset_y = g_off.y-1;
+      g.offset_x = g_off.x - 1;
+      g.offset_y = g_off.y - 1;
       g.ch = code;
       g.opt = 0;  // opt;
 
@@ -292,12 +292,13 @@ const Font* ResFontFT::getFont(const char* name, int size) const {
 
 const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSize, float& resScale) const {
    if (!styleFontSize) return 0;
-   
+
    int fontSize = styleFontSize;
 
    int delta = fontSize % SBTT_SDF_SIZE;
-   
-   if (delta > SBTT_SDF_SIZE/2) fontSize += SBTT_SDF_SIZE - delta;
+
+   if (delta > SBTT_SDF_SIZE / 2)
+      fontSize += SBTT_SDF_SIZE - delta;
    else {
       fontSize -= delta;
       if (fontSize < SBTT_SDF_SIZE) fontSize = SBTT_SDF_SIZE;
