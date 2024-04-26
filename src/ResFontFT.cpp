@@ -214,7 +214,7 @@ class FontFT : public Font {
       /*
       std::string utf8;
       oxygine::charCode2Bytes(utf8, code);
-      logs::messageln("GLYPH <%s> [%d] [%d,%d]x[%d,%d]x[%d,%d]", utf8.c_str(), padding, g.offset_x, g.offset_y, g.advance_x, g.advance_y, g.sw, g.sh);
+      logs::messageln("GLYPH <T %s T> [%d] [%f,%f]x[%f,%f]x[%p]", utf8.c_str(), _size, g.src.pos.x, g.src.pos.y, g.src.size.x, g.src.size.y, g.texture.get());
       */
       stbtt_FreeBitmap(bitmap, nullptr);
 
@@ -295,14 +295,11 @@ const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSi
 
    int fontSize = styleFontSize;
 
-   int delta = fontSize % SBTT_SDF_SIZE;
-
-   if (delta > SBTT_SDF_SIZE / 2)
-      fontSize += SBTT_SDF_SIZE - delta;
-   else {
-      fontSize -= delta;
-      if (fontSize < SBTT_SDF_SIZE) fontSize = SBTT_SDF_SIZE;
-   }
+   if (fontSize % SBTT_SDF_SIZE > SBTT_SDF_SIZE / 2)
+      fontSize += SBTT_SDF_SIZE - fontSize % SBTT_SDF_SIZE;
+   else
+      fontSize -= fontSize % SBTT_SDF_SIZE;
+   if (fontSize < SBTT_SDF_SIZE) fontSize = SBTT_SDF_SIZE;
 
    resScale = (float)fontSize / (float)styleFontSize;
    return getFont(0, fontSize);
