@@ -292,7 +292,7 @@ const Font* ResFontFT::getFont(const char* name, int size) const {
 
 const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSize, float& resScale) const {
    if (!styleFontSize) return 0;
-
+   if (worldScale < 1) worldScale = 1;
    int fontSize = styleFontSize * worldScale;
 
    if (fontSize % SBTT_SDF_SIZE > SBTT_SDF_SIZE / 2)
