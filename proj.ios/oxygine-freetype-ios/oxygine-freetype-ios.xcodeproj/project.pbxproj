@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		AD1344A91D4AFCF600D65B88 /* ResFontFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AD1344A71D4AFCF600D65B88 /* ResFontFT.cpp */; };
-		AD1344AD1D4B019A00D65B88 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AD1344AC1D4B019A00D65B88 /* libfreetype.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,7 +34,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AD1344AD1D4B019A00D65B88 /* libfreetype.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,6 +105,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = AD1344921D4AFCDB00D65B88;
@@ -226,6 +225,10 @@
 		AD1344A51D4AFCDB00D65B88 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					../../../glm,
+					"../../../oxygine-framework/oxygine/src",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -235,6 +238,10 @@
 		AD1344A61D4AFCDB00D65B88 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					../../../glm,
+					"../../../oxygine-framework/oxygine/src",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
