@@ -96,14 +96,14 @@ void ResFontFT::setGlyphPostProcessor(postProcessHook f) {
 }
 
 Image tempImage;
-#define STBTT_SCALE 1.2f
-#define SBTT_SDF_SIZE 20
+#define STBTT_SCALE 1.20f
+#define SBTT_SDF_SIZE 16
 class FontFT : public Font {
   public:
    FontFT(ResFontFT* rs, int size, bool SDF) : _rs(rs), _size(size) {
       OX_ASSERT(size > 0);
 
-      if (size <= 0) size = 10;
+      if (size <= 0) size = SBTT_SDF_SIZE;
       _ignoreOptions = true;
 
       stbtt_fontinfo& face = *_rs->_faces.begin();
@@ -120,7 +120,7 @@ class FontFT : public Font {
       init("TTF Font", size, baseline, mxadv, SDF);
       logs::messageln("FONT %p=>%p::%d %f", rs, this, size, scale);
    }
-   virtual int getPadding() const override { return SBTT_SDF_SIZE / 2; }
+   virtual int getPadding() const override { return SBTT_SDF_SIZE; }
    virtual bool BiDiPass(std::vector<text::Symbol*>& line) const override {
       if (_rs->bidiDelegate())
          return _rs->bidiDelegate()(line);
@@ -157,7 +157,7 @@ class FontFT : public Font {
       Point g_size(0);
       Point g_off(0);
 
-      int oneside = 128;
+      int oneside = 0x80;
       int padding = getPadding();
 
       float scale = stbtt_ScaleForPixelHeight(face, _size * STBTT_SCALE);
@@ -292,7 +292,6 @@ const Font* ResFontFT::getFont(const char* name, int size) const {
 
 const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSize, float& resScale) const {
    if (!styleFontSize) return 0;
-   if (worldScale < 1) worldScale = 1;
    int fontSize = styleFontSize * worldScale;
 
    if (fontSize % SBTT_SDF_SIZE > SBTT_SDF_SIZE / 2)
