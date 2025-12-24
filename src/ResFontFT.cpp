@@ -121,12 +121,6 @@ class FontFT : public Font {
       logs::messageln("FONT %p=>%p::%d %f", rs, this, size, scale);
    }
    virtual int getPadding() const override { return SBTT_SDF_SIZE; }
-   virtual bool BiDiPass(std::vector<text::Symbol*>& line) const override {
-      if (_rs->bidiDelegate())
-         return _rs->bidiDelegate()(line);
-      else
-         return false;
-   }
 
   protected:
    ResFontFT* _rs;
