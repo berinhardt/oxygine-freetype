@@ -11,7 +11,3 @@ add_library(oxygine-freetype STATIC
 target_link_libraries(oxygine-freetype PUBLIC oxygine-framework)
 target_include_directories(oxygine-freetype PUBLIC ${OXYGINE_FREETYPE_INCLUDE_DIRS})
 
-
-set(OXYGINE_FREETYPE_INCLUDE_DIRS ${OXYGINE_FREETYPE_INCLUDE_DIRS} PARENT_SCOPE)
-set(OXYGINE_FREETYPE_CXX_FLAGS ${OXYGINE_FREETYPE_CXX_FLAGS} PARENT_SCOPE)
-
