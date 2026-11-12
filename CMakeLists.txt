@@ -31,5 +31,9 @@ if (ANDROID)
    # needed.
    target_include_directories(oxygine-freetype BEFORE PRIVATE
       "${CMAKE_CURRENT_SOURCE_DIR}/../oxygine-framework/oxygine/src")
+   # The rest of LOCAL_C_INCLUDES: the glm and SDL spellings ndk-build used.
+   target_include_directories(oxygine-freetype BEFORE PRIVATE
+      "${CMAKE_CURRENT_SOURCE_DIR}/../glm/"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../SDL/include/")
 endif()
 
