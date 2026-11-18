@@ -75,6 +75,7 @@ class ResFontFT : public ResFont {
    spTexture createTexture(int w, int h);
 
    std::list<stbtt_fontinfo> _faces;
+   bool _missingFaceLogged = false;
 
    symbolCallback notFoundCB;
    BiDiCallback _bidiDelegate;
