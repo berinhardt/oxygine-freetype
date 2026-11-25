@@ -106,6 +106,12 @@ class FontFT : public Font {
       if (size <= 0) size = SBTT_SDF_SIZE;
       _ignoreOptions = true;
 
+      if (_rs->_faces.empty()) {
+         logs::error("FontFT: font '%s' has no loaded face", _rs->getName().c_str());
+         init("TTF Font", size, size, size, SDF);
+         return;
+      }
+
       stbtt_fontinfo& face = *_rs->_faces.begin();
       int ascent;
       int descent;
@@ -273,6 +279,15 @@ Font* ResFontFT::getFont(int size) {
 
       if (f->getSize() == size) return f;
    }
+
+   if (_faces.empty()) {
+      if (!_missingFaceLogged) {
+         _missingFaceLogged = true;
+         logs::error("ResFontFT::getFont: '%s' has no loaded face", getName().c_str());
+      }
+      return nullptr;
+   }
+
    _fonts.push_back(FontFT(this, size, true));
    return &_fonts.back();
 }
@@ -299,27 +314,42 @@ const oxygine::Font* ResFontFT::getClosestFont(float worldScale, int styleFontSi
 }
 
 void ResFontFT::_load(LoadResourcesContext* context) {
-   if (!_file.empty()) {
-      file::read(_file.c_str(), _fdata);
+   if (_file.empty()) return;
 
-      stbtt_fontinfo _face;
-      int success = stbtt_InitFont(&_face, (const uint8_t*)_fdata.getData(), 0);
-      _faces.push_back(_face);
-      OX_ASSERT(success);
-      _file = "";
+   if (!file::read(_file.c_str(), _fdata) || !_fdata.getData() || !_fdata.getSize()) {
+      logs::error("ResFontFT: unable to read font file '%s'", _file.c_str());
+      return;
    }
+
+   stbtt_fontinfo _face;
+   if (!stbtt_InitFont(&_face, (const uint8_t*)_fdata.getData(), 0)) {
+      logs::error("ResFontFT: '%s' is not a valid font", _file.c_str());
+      return;
+   }
+
+   _faces.push_back(_face);
+   _missingFaceLogged = false;
+   _file = "";
 }
 
 void ResFontFT::addFace(const unsigned char* data, size_t size) {
+   if (!data || !size) {
+      logs::error("ResFontFT: ignoring empty font face");
+      return;
+   }
+
    stbtt_fontinfo _face;
    int success = stbtt_InitFont(&_face, data, 0);
 
    if (success) {
       _faces.push_back(_face);
+      _missingFaceLogged = false;
 
       for (auto it = _fonts.begin(); it != _fonts.end(); ++it) {
          it->rehash();
       }
+   } else {
+      logs::error("ResFontFT: invalid font face");
    }
 }
 
